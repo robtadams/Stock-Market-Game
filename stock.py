@@ -15,6 +15,7 @@ class Stock():
         self.negVar = 40
 
         self.dis = 10
+        self.lineList = []
 
         self.lineWidth = lineWidth
         self.startHeight = startHeight
@@ -28,13 +29,18 @@ class Stock():
         self.p1 = Point(0, startHeight)
         self.p2 = Point(self.dis, startHeight + randint(-3, 3))
 
+    def buyStock(self):
+        print("Bought {}".format(self.Name))
+
+    def sellStock(self):
+        print("Sold {}".format(self.Name))
+
 def main():
     
     iteration = 0
     switchRate = 5
     almostOffScreen = 500
-    dis = 10
-    graphSpeed = 1
+    graphSpeed = 0
 
     Modes = ["flat", "slow rise", "slow fall", "fast rise", "fast fall", "chaotic"]
     Mode = Modes[randint(0,5)]
@@ -45,7 +51,11 @@ def main():
     crackerStock = Stock("crackerStock", color = "blue")
     sardineStock = Stock("sardineStock", color = "green")
 
-    lineList = []
+    #buyCheeseButton = tk.Button(win, text="Buy Cheese", command = cheeseStock.buyStock())
+    #buyCheeseButton.place(x=50, y=50)
+    #sellCheeseButton = tk.Button(win, text="Sell Cheese", command = cheeseStock.sellStock())
+    #sellCheeseButton.place(x=100, y=50)
+
     stockList = [cheeseStock, crackerStock, sardineStock]
     
     while True:
@@ -63,7 +73,7 @@ def main():
                     else :
                         stock.Mode = Modes[4]
                         
-                    match Mode:
+                    match stock.Mode:
                         case "flat":
                             stock.posVar=3
                             stock.negVar=3
@@ -83,25 +93,27 @@ def main():
                             stock.posVar = 20
                             stock.negVar = 20
 
-                    print("{0}: {1} mode".format(stock.Name, stock.Mode))
+                    #print("{0}: {1} mode".format(stock.Name, stock.Mode))
             
-            if len(lineList) > win.width/dis:
-                for line in lineList:
-                    line.move(-dis, 0)
-                    line.getP1().move(-dis,0)
-                    line.getP2().move(-dis,0)
-                for stock in stockList:
-                    deleteLine = lineList.pop(0)
-                    deleteLine.undraw()
-                    stock.p1.move(-dis, 0)
-                    stock.p2.move(-dis, 0)
+            if len(stock.lineList) > (win.width/stock.dis):
+                for line in stock.lineList:
+                    line.move(-stock.dis, 0)
+                    line.getP1().move(-stock.dis,0)
+                    line.getP2().move(-stock.dis,0)
+                #for stock in stockList:
+                deleteLine = stock.lineList.pop(0)
+                deleteLine.undraw()
+                
+                # Keep an eye out on these lines
+                stock.p1.move(-stock.dis, 0)
+                stock.p2.move(-stock.dis, 0)
 
             if stock.p2.getY() > almostOffScreen:
                 stock.reallyBadStock = True
             else:
                 stock.reallyBadStock = False
 
-            if stock.p2.getY() < win.height - 40:
+            if stock.p2.getY() < 40:
                 stock.reallyTooGoodStock = True
             else:
                 stock.reallyTooGoodStock = False
@@ -110,14 +122,16 @@ def main():
             line.setFill(stock.color)
             line.setWidth(stock.lineWidth)
 
-            lineList.append(line)
+            stock.lineList.append(line)
             
             line.draw(win)
             
-            stock.p1 = lineList[-1].getP2()
-            stock.p2 = Point(stock.p1.getX() + dis,
-                             stock.p1.getY() - randint(-stock.negVar, stock.posVar))
-
-        time.sleep(graphSpeed)
+            stock.p1 = stock.lineList[-1].getP2()
+            p2Y = stock.p1.getY() - randint(-stock.negVar, stock.posVar)
+            if p2Y < 0:
+                p2Y = 0
+            if p2Y > win.height:
+                p2Y = win.height
+            stock.p2 = Point(stock.p1.getX() + stock.dis, p2Y)
         
 main()
