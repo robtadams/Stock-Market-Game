@@ -1,3 +1,9 @@
+# Wiley Sheehy
+# Robin Adams
+# Headlands Prep
+# Intro to CS S1
+# 10/14/21
+
 # importing neccesary libraries
 #-------------------------------------------------------------------------------
 
@@ -29,11 +35,25 @@ class Stock():
         self.p1 = Point(0, startHeight)
         self.p2 = Point(self.dis, startHeight + randint(-3, 3))
 
-    def buyStock(self):
-        print("Bought {}".format(self.Name))
+        self.stockOwned = 0
 
-    def sellStock(self):
-        print("Sold {}".format(self.Name))
+    def buyStock(self, wallet):
+        price = self.p2.getY()
+        if wallet > price:
+            wallet -= price
+            self.stockOwned += 1
+            print("Bought {0}\nYou have ${1} and {2} {3} remaining".format(self.Name, wallet, self.stockOwned, self.Name))
+        else:
+            print("You don't have enough money to buy {}".format(self.Name))
+            
+    def sellStock(self, wallet):
+        price = self.p2.getY()
+        if self.stockOwned > 0:
+            self.stockOwned -= 1
+            wallet += price
+            print("Sold {0}\nYou have ${1} and {2} {3} remaining".format(self.Name, wallet, self.stockOwned, self.Name))
+        else:
+            print("You don't have any {} left".format(self.Name))
 
 def main():
     
@@ -45,16 +65,59 @@ def main():
     Modes = ["flat", "slow rise", "slow fall", "fast rise", "fast fall", "chaotic"]
     Mode = Modes[randint(0,5)]
 
-    win = GraphWin(width=729, height= 512)
+    win = GraphWin(width=800, height= 600)
 
     cheeseStock = Stock("cheeseStock",   color = "red")
-    crackerStock = Stock("crackerStock", color = "blue")
     sardineStock = Stock("sardineStock", color = "green")
+    crackerStock = Stock("crackerStock", color = "blue")
 
-    #buyCheeseButton = tk.Button(win, text="Buy Cheese", command = cheeseStock.buyStock())
-    #buyCheeseButton.place(x=50, y=50)
-    #sellCheeseButton = tk.Button(win, text="Sell Cheese", command = cheeseStock.sellStock())
-    #sellCheeseButton.place(x=100, y=50)
+    wallet = 0
+
+    """ Buttons """
+
+    
+
+    # Buy Red Button
+    br1 = Point(10, 410)
+    br2 = Point(220, 495)
+    buyRedButton = Rectangle(br1, br2)
+    buyRedButton.setFill("red")
+    buyRedButton.draw(win)
+
+    # Sell Red Button
+    sr1 = Point(10, 505)
+    sr2 = Point(220, 590)
+    sellRedButton = Rectangle(sr1, sr2)
+    sellRedButton.setFill("red")
+    sellRedButton.draw(win)
+
+    # Buy Green Button
+    bg1 = Point(240, 410)
+    bg2 = Point(450, 495)
+    buyGreenButton = Rectangle(bg1, bg2)
+    buyGreenButton.setFill("green")
+    buyGreenButton.draw(win)
+
+    # Sell Green Button
+    sg1 = Point(240, 505)
+    sg2 = Point(450, 590)
+    sellGreenButton = Rectangle(sg1, sg2)
+    sellGreenButton.setFill("green")
+    sellGreenButton.draw(win)
+
+    # Buy Blue Button
+    bb1 = Point(470, 410)
+    bb2 = Point(690, 495)
+    buyBlueButton = Rectangle(bb1, bb2)
+    buyBlueButton.setFill("blue")
+    buyBlueButton.draw(win)
+
+    # Sell Blue Button
+    sb1 = Point(470, 505)
+    sb2 = Point(690, 590)
+    sellBlueButton = Rectangle(sb1, sb2)
+    sellBlueButton.setFill("blue")
+    sellBlueButton.draw(win)
 
     stockList = [cheeseStock, crackerStock, sardineStock]
     
@@ -130,8 +193,38 @@ def main():
             p2Y = stock.p1.getY() - randint(-stock.negVar, stock.posVar)
             if p2Y < 0:
                 p2Y = 0
-            if p2Y > win.height:
-                p2Y = win.height
+            if p2Y > win.height - 200:
+                p2Y = win.height - 200
             stock.p2 = Point(stock.p1.getX() + stock.dis, p2Y)
+
+        """ Buy and Sell Stocks """
+
+        # Get mouse click
+        mousePoint = win.getMouse()
+
+        mouseX = mousePoint.getX()
+        mouseY = mousePoint.getY()
+
+        # Buy Red Stock
+        if mouseX > br1.getX() and mouseX < br2.getX():
+            if mouseY > br1.getY() and mouseY < br2.getY():
+                cheeseStock.buyStock(wallet)
+
+        # Sell Red Stock
+        if mouseX > sr1.getX() and mouseX < sr2.getX():
+            if mouseY > sr1.getY() and mouseY < sr2.getY():
+                cheeseStock.sellStock(wallet)
+
+        # Buy Green Stock
         
+
+        # Sell Green Stock
+        
+
+        # Buy Blue Stock
+        
+
+        # Sell Blue Stock
+        
+            
 main()
