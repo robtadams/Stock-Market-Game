@@ -34,33 +34,43 @@ class Stock():
 
         self.p1 = Point(0, startHeight)
         self.p2 = Point(self.dis, startHeight + randint(-3, 3))
+        self.price = 600 - self.p2.getY()
 
         self.stockOwned = 0
 
-    def buyStock(self, wallet):
-        price = self.p2.getY()
-        if wallet > price:
-            wallet -= price
-            self.stockOwned += 1
+    def buyStock(self, wallet, amount):
+        self.price = 600 - self.p2.getY()
+        if wallet > self.price * amount:
+            wallet -= self.price * amount
+            self.stockOwned += amount
             print("Bought {0}\nYou have ${1} and {2} {3} remaining".format(self.Name, wallet, self.stockOwned, self.Name))
         else:
+            wallet -= self.price * (wallet // self.price)
+            self.stockOwned += (wallet // self.price)
             print("You don't have enough money to buy {}".format(self.Name))
+        return wallet
             
-    def sellStock(self, wallet):
-        price = self.p2.getY()
-        if self.stockOwned > 0:
-            self.stockOwned -= 1
-            wallet += price
+    def sellStock(self, wallet, amount):
+        self.price = 600 - self.p2.getY()
+        if self.stockOwned > amount - 1:
+            self.stockOwned -= amount
+            wallet += self.price * amount
             print("Sold {0}\nYou have ${1} and {2} {3} remaining".format(self.Name, wallet, self.stockOwned, self.Name))
         else:
+            self.stockOwned -= self.stockOwned
+            wallet += self.price * self.stockOwned
             print("You don't have any {} left".format(self.Name))
+        return wallet
 
 def main():
+
+    amount = 1
     
     iteration = 0
     switchRate = 5
     almostOffScreen = 500
-    graphSpeed = 0
+    graphSpeed = 0.25
+    pauseCheck = True
 
     Modes = ["flat", "slow rise", "slow fall", "fast rise", "fast fall", "chaotic"]
     Mode = Modes[randint(0,5)]
@@ -71,11 +81,9 @@ def main():
     sardineStock = Stock("sardineStock", color = "green")
     crackerStock = Stock("crackerStock", color = "blue")
 
-    wallet = 0
+    wallet = 1000
 
     """ Buttons """
-
-    
 
     # Buy Red Button
     br1 = Point(10, 410)
@@ -83,6 +91,9 @@ def main():
     buyRedButton = Rectangle(br1, br2)
     buyRedButton.setFill("red")
     buyRedButton.draw(win)
+    textP = Point((br1.getX() + br2.getX())/2, (br1.getY() + br2.getY())/2)
+    buyText = Text(textP, "Buy Cheese Stock")
+    buyText.draw(win)
 
     # Sell Red Button
     sr1 = Point(10, 505)
@@ -90,6 +101,9 @@ def main():
     sellRedButton = Rectangle(sr1, sr2)
     sellRedButton.setFill("red")
     sellRedButton.draw(win)
+    textP = Point((sr1.getX() + sr2.getX())/2, (sr1.getY() + sr2.getY())/2)
+    buyText = Text(textP, "Sell Cheese Stock")
+    buyText.draw(win)
 
     # Buy Green Button
     bg1 = Point(240, 410)
@@ -97,6 +111,9 @@ def main():
     buyGreenButton = Rectangle(bg1, bg2)
     buyGreenButton.setFill("green")
     buyGreenButton.draw(win)
+    textP = Point((bg1.getX() + bg2.getX())/2, (bg1.getY() + bg2.getY())/2)
+    buyText = Text(textP, "Buy Sardine Stock")
+    buyText.draw(win)
 
     # Sell Green Button
     sg1 = Point(240, 505)
@@ -104,6 +121,9 @@ def main():
     sellGreenButton = Rectangle(sg1, sg2)
     sellGreenButton.setFill("green")
     sellGreenButton.draw(win)
+    textP = Point((sg1.getX() + sg2.getX())/2, (sg1.getY() + sg2.getY())/2)
+    buyText = Text(textP, "Sell Sardine Stock")
+    buyText.draw(win)
 
     # Buy Blue Button
     bb1 = Point(470, 410)
@@ -111,6 +131,9 @@ def main():
     buyBlueButton = Rectangle(bb1, bb2)
     buyBlueButton.setFill("blue")
     buyBlueButton.draw(win)
+    textP = Point((bb1.getX() + bb2.getX())/2, (bb1.getY() + bb2.getY())/2)
+    buyText = Text(textP, "Buy Cracker Stock")
+    buyText.draw(win)
 
     # Sell Blue Button
     sb1 = Point(470, 505)
@@ -118,6 +141,9 @@ def main():
     sellBlueButton = Rectangle(sb1, sb2)
     sellBlueButton.setFill("blue")
     sellBlueButton.draw(win)
+    textP = Point((sb1.getX() + sb2.getX())/2, (sb1.getY() + sb2.getY())/2)
+    buyText = Text(textP, "Sell Cracker Stock")
+    buyText.draw(win)
 
     stockList = [cheeseStock, crackerStock, sardineStock]
     
@@ -159,6 +185,7 @@ def main():
                     #print("{0}: {1} mode".format(stock.Name, stock.Mode))
             
             if len(stock.lineList) > (win.width/stock.dis):
+                pauseCheck = False
                 for line in stock.lineList:
                     line.move(-stock.dis, 0)
                     line.getP1().move(-stock.dis,0)
@@ -197,34 +224,47 @@ def main():
                 p2Y = win.height - 200
             stock.p2 = Point(stock.p1.getX() + stock.dis, p2Y)
 
-        """ Buy and Sell Stocks """
+        if iteration % switchRate*randint(1,3) == 0:
 
-        # Get mouse click
-        mousePoint = win.getMouse()
+            """ Buy and Sell Stocks """
 
-        mouseX = mousePoint.getX()
-        mouseY = mousePoint.getY()
+            # Get mouse click
+            mousePoint = win.getMouse()
 
-        # Buy Red Stock
-        if mouseX > br1.getX() and mouseX < br2.getX():
-            if mouseY > br1.getY() and mouseY < br2.getY():
-                cheeseStock.buyStock(wallet)
+            mouseX = mousePoint.getX()
+            mouseY = mousePoint.getY()
 
-        # Sell Red Stock
-        if mouseX > sr1.getX() and mouseX < sr2.getX():
-            if mouseY > sr1.getY() and mouseY < sr2.getY():
-                cheeseStock.sellStock(wallet)
+            # Buy Red Stock
+            if mouseX > br1.getX() and mouseX < br2.getX():
+                if mouseY > br1.getY() and mouseY < br2.getY():
+                    wallet = cheeseStock.buyStock(wallet, amount)
 
-        # Buy Green Stock
-        
+            # Sell Red Stock
+            if mouseX > sr1.getX() and mouseX < sr2.getX():
+                if mouseY > sr1.getY() and mouseY < sr2.getY():
+                    wallet = cheeseStock.sellStock(wallet, amount)
 
-        # Sell Green Stock
-        
+            # Buy Green Stock
+            if mouseX > bg1.getX() and mouseX < bg2.getX():
+                if mouseY > bg1.getY() and mouseY < bg2.getY():
+                    wallet = sardineStock.buyStock(wallet, amount)
 
-        # Buy Blue Stock
-        
+            # Sell Green Stock
+            if mouseX > sg1.getX() and mouseX < sg2.getX():
+                if mouseY > sg1.getY() and mouseY < sg2.getY():
+                    wallet = sardineStock.sellStock(wallet, amount)
 
-        # Sell Blue Stock
-        
+            # Buy Blue Stock
+            if mouseX > bb1.getX() and mouseX < bb2.getX():
+                if mouseY > bb1.getY() and mouseY < bb2.getY():
+                    wallet = crackerStock.buyStock(wallet, amount)
+
+            # Sell Blue Stock
+            if mouseX > sb1.getX() and mouseX < sb2.getX():
+                if mouseY > sb1.getY() and mouseY < sb2.getY():
+                    wallet = crackerStock.sellStock(wallet, amount)
+
+        if pauseCheck:
+            time.sleep(graphSpeed)
             
 main()
